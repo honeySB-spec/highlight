@@ -1,0 +1,5 @@
+{
+  "name": "SmartNotes PDF Highlighter",
+  "description": "An intelligent study companion that analyzes your PDF notes and automatically highlights the most important concepts and key takeaways using Gemini AI.",
+  "requestFramePermissions": []
+}
