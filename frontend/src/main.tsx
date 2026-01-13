@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { ThemeProvider } from "./components/theme-provider"
 
 import { ClerkProvider } from '@clerk/clerk-react'
 
@@ -14,7 +15,9 @@ if (!PUBLISHABLE_KEY) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-      <App />
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme" attribute="class" enableSystem>
+        <App />
+      </ThemeProvider>
     </ClerkProvider>
   </StrictMode>,
 )

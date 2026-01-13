@@ -1,7 +1,4 @@
-
 import { Sparkles, FileSearch } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 
 interface AnalysisControlsProps {
     onAnalyze: () => void;
@@ -16,34 +13,37 @@ export function AnalysisControls({
 }: AnalysisControlsProps) {
 
     return (
-        <div className="w-full max-w-xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150 text-center">
-            <Label className="text-sm font-medium block mb-2 text-gray-600">
-                Ready to analyze your document?
-            </Label>
-
-            <div className="flex justify-center">
-                <Button
+        <div className="w-full text-center font-mono">
+            <div className="flex flex-col items-center gap-4">
+                <button
                     onClick={onAnalyze}
                     disabled={disabled || isProcessing}
-                    size="lg"
-                    className="flex items-center gap-2 min-w-[200px] h-12 text-base shadow-lg hover:shadow-xl transition-all duration-300"
+                    className={`
+                        group relative flex items-center justify-center gap-3 w-full max-w-xs h-14 text-base font-bold uppercase tracking-wider
+                        transition-all duration-200 border border-input
+                        ${disabled || isProcessing
+                            ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                            : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        }
+                    `}
                 >
                     {isProcessing ? (
                         <>
                             <FileSearch className="w-5 h-5 animate-pulse" />
-                            Analyzing with Gemini...
+                            Processing...
                         </>
                     ) : (
                         <>
                             <Sparkles className="w-5 h-5" />
-                            Analyze & Highlight
+                            [ RUN_ANALYSIS ]
                         </>
                     )}
-                </Button>
+                </button>
+
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                    // AI MODEL: GEMINI PRO 2.0
+                </p>
             </div>
-            <p className="text-xs text-gray-400 mt-2">
-                Powered by Google Gemini AI
-            </p>
         </div>
     );
 }

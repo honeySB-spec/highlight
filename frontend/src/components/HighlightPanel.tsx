@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, AlertCircle, Info } from 'lucide-react';
+import { ChevronDown, ChevronRight, AlertCircle, Terminal } from 'lucide-react';
 
 interface Highlight {
     phrase: string;
@@ -16,50 +16,53 @@ export function HighlightPanel({ highlights }: HighlightPanelProps) {
 
     if (!highlights || highlights.length === 0) {
         return (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
-                <AlertCircle className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-                <p className="text-gray-500">No specific highlights found.</p>
+            <div className="bg-card border border-border p-8 text-center font-mono">
+                <AlertCircle className="w-8 h-8 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground uppercase tracking-wider text-xs">No extractable data found.</p>
             </div>
         );
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full max-h-[600px]">
-            <div className="p-4 border-b border-gray-100 bg-gray-50">
-                <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                    <Info className="w-4 h-4 text-blue-500" />
-                    Key Insights ({highlights.length})
+        <div className="bg-card border border-border flex flex-col h-full max-h-[600px] font-mono">
+            <div className="p-4 border-b border-border bg-card sticky top-0 z-10">
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                    <Terminal className="w-4 h-4 text-foreground" />
+                    EXTRACTED_INSIGHTS [{highlights.length}]
                 </h3>
             </div>
 
-            <div className="overflow-y-auto flex-1 p-2 space-y-2">
+            <div className="overflow-y-auto flex-1 custom-scrollbar">
                 {highlights.map((item, index) => (
                     <div
                         key={index}
                         className={`
-              rounded-lg border transition-all duration-200 cursor-pointer
-              ${expandedIndex === index
-                                ? 'bg-blue-50 border-blue-200 shadow-sm'
-                                : 'bg-white border-transparent hover:bg-gray-50 hover:border-gray-200'
+                            border-b border-border group transition-colors cursor-pointer
+                            ${expandedIndex === index
+                                ? 'bg-muted text-foreground'
+                                : 'bg-card text-muted-foreground hover:text-foreground hover:bg-muted/50'
                             }
-            `}
+                        `}
                         onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
                     >
-                        <div className="p-3 flex items-start gap-3">
-                            <div className="mt-1 flex-shrink-0 text-gray-400">
+                        <div className="p-4 flex items-start gap-3">
+                            <div className="mt-0.5 flex-shrink-0">
                                 {expandedIndex === index ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                             </div>
                             <div className="flex-1">
-                                <p className={`text-sm font-medium ${expandedIndex === index ? 'text-blue-900' : 'text-gray-700'}`}>
+                                <p className={`text-sm leading-relaxed ${expandedIndex === index ? 'font-bold' : 'font-normal'}`}>
                                     "{item.phrase}"
                                 </p>
-                                <span className="text-xs text-gray-400 mt-1 block">Page {item.page}</span>
+                                <div className="mt-2 flex items-center gap-2 text-[10px] uppercase tracking-widest opacity-60">
+                                    <span>[ PAGE_REF: {item.page} ]</span>
+                                </div>
                             </div>
                         </div>
 
                         {expandedIndex === index && (
-                            <div className="px-3 pb-3 ml-7 animate-in slide-in-from-top-2 duration-200">
-                                <div className="text-sm text-gray-600 bg-white/60 p-3 rounded-md border border-blue-100">
+                            <div className="px-11 pb-6 animate-in slide-in-from-top-1 duration-150">
+                                <div className="text-xs leading-relaxed border-l-2 border-foreground pl-4">
+                                    <span className="font-bold uppercase tracking-wide block mb-1">Analysis:</span>
                                     {item.details}
                                 </div>
                             </div>

@@ -1,7 +1,4 @@
 import React, { useState } from 'react';
-import { Download, CheckCheck, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 interface ResultsProps {
@@ -48,39 +45,32 @@ export function Results({ matchCount, downloadUrl }: ResultsProps) {
     };
 
     return (
-        <Card className="w-full max-w-xl mx-auto mt-8 animate-in zoom-in-95 duration-500">
-            <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="w-full max-w-xl mx-auto mt-8 font-mono animate-in zoom-in-95 duration-500">
+            <div className="border-2 border-black dark:border-white p-6 flex flex-col sm:flex-row items-center justify-between gap-6 bg-white dark:bg-black">
                 <div className="flex items-center gap-4">
-                    <div className="p-3 bg-green-100 rounded-full text-green-600 dark:bg-green-900/30 dark:text-green-400">
-                        <CheckCheck className="w-6 h-6" />
+                    <div className="text-xl font-bold select-none">
+                        [SUCCESS]
                     </div>
                     <div>
-                        <h3 className="text-lg font-semibold">Processing Complete!</h3>
-                        <p className="text-muted-foreground">
-                            Found <span className="font-bold text-foreground">{matchCount}</span> occurrences.
+                        <h3 className="text-lg font-bold uppercase">Processing Complete</h3>
+                        <p className="text-sm">
+                            Found [{matchCount}] occurrences.
                         </p>
                     </div>
                 </div>
 
-                <Button
-                    size="lg"
-                    className="shadow-lg min-w-[160px]"
+                <button
                     onClick={handleDownload}
                     disabled={isDownloading}
+                    className="min-w-[160px] px-4 py-2 border-2 border-black dark:border-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors disabled:opacity-50 uppercase font-bold text-sm tracking-wider"
                 >
                     {isDownloading ? (
-                        <>
-                            <Loader2 className="mr-2 w-5 h-5 animate-spin" />
-                            Downloading...
-                        </>
+                        '[ DOWNLOADING... ]'
                     ) : (
-                        <>
-                            <Download className="mr-2 w-5 h-5" />
-                            Download PDF
-                        </>
+                        '[ DOWNLOAD PDF ]'
                     )}
-                </Button>
-            </CardContent>
-        </Card>
+                </button>
+            </div>
+        </div>
     );
 }

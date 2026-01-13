@@ -25,12 +25,13 @@ def analyze_page(text):
     # Use flash lite model which might have better availability
     model = genai.GenerativeModel('models/gemini-2.5-flash-lite')
     
-    prompt = f""" Imagine you are a careful reader going through this document. Highlight the key points and important details you would want to remember or focus on later.
+    prompt = f""" Please read through this PDF document carefully. Identify and extract the most important key points, main ideas, and crucial facts that are essential for understanding the content. Summarize these points concisely and highlight them directly within the context of the notes. Focus only on what is necessary for retaining and reviewing the material efficiently, avoiding any less relevant information. Present the highlights in a clear, organized manner to make the document easier to study and review.
     Return a valid JSON list of objects: [{{"phrase": "exact text", "details": "why"}}]
     
     Rules:
     1. "phrase" MUST match the text EXACTLY.
-
+    2. "details" should be a detailed description of why this phrase is important.
+    3. "page" should be the page number of the PDF.   
     
     Text:
     {text}

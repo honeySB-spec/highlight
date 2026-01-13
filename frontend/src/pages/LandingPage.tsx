@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { SignInButton, useAuth } from "@clerk/clerk-react";
-import { ArrowRight, CheckCircle2, Zap, Shield, FileText, Sparkles } from 'lucide-react';
+import { ModeToggle } from '../components/mode-toggle';
 
 export function LandingPage() {
     const { isSignedIn } = useAuth();
@@ -12,38 +12,70 @@ export function LandingPage() {
         }
     };
 
+    const logoAscii = `
+               _________   _____      _____ _____________________              
+            /   _____/  /     \\    /  _  \\\\______   \\__    ___/              
+            \\_____  \\  /  \\ /  \\  /  /_\\  \\|       _/ |    |                 
+            /        \\/    Y    \\/    |    \\    |   \\ |    |                 
+           /_______  /\\____|__  /\\____|__  /____|_  / |____|                 
+                   \\/         \\/         \\/       \\/                         
+  ___ ___ .___  ________  ___ ___ .____    .___  ________  ___ ______________
+ /   |   \\|   |/  _____/ /   |   \\|    |   |   |/  _____/ /   |   \\__    ___/
+/    ~    \\   /   \\  ___/    ~    \\    |   |   /   \\  ___/    ~    \\|    |   
+\\    Y    /   \\    \\_\\  \\    Y    /    |___|   \\    \\_\\  \\    Y    /|    |   
+ \\___|_  /|___|\\______  /\\___|_  /|_______ \\___|\\______  /\\___|_  / |____|   
+                   \\/             \\/       \\/         \\/           \\/       \\/                       
+    `;
+
+
+
+    const feature1Ascii = `
+ [ FAST ]
+  >>>>>
+  >>>>>
+  >>>>>
+    `;
+
+    const feature2Ascii = `
+ [ PRECISE ]
+   ( * )
+    \\|/
+     |
+    `;
+
+    const feature3Ascii = `
+ [ SECURE ]
+   /---\\
+   |[_]|
+   \\---/
+    `;
+
     return (
-        <div className="min-h-screen bg-[#FDFCFD] selection:bg-blue-100 overflow-hidden">
-            {/* Background Gradients */}
-            <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-100/30 rounded-full blur-[128px]" />
-                <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-indigo-100/30 rounded-full blur-[128px]" />
-                <div className="absolute top-[40%] left-[30%] w-[40%] h-[40%] bg-purple-50/50 rounded-full blur-[96px]" />
+        <div className="min-h-screen bg-background text-foreground font-mono selection:bg-primary selection:text-primary-foreground overflow-x-hidden">
+            {/* Grid Background Effect */}
+            <div className="fixed inset-0 z-0 opacity-10 pointer-events-none"
+                style={{ backgroundImage: 'linear-gradient(var(--color-muted-foreground) 1px, transparent 1px), linear-gradient(90deg, var(--color-muted-foreground) 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
             </div>
 
-            <div className="relative z-10">
+            <div className="relative z-10 flex flex-col min-h-screen">
                 {/* Navigation */}
-                <nav className="flex items-center justify-between px-6 py-6 md:px-12 max-w-7xl mx-auto">
-                    <div className="flex items-center gap-2">
-                        <div className="bg-gradient-to-tr from-blue-600 to-indigo-600 p-2 rounded-lg text-white">
-                            <Sparkles className="w-5 h-5" />
-                        </div>
-                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700">
-                            SmartHighlight
-                        </span>
+                <nav className="flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full border-b border-border">
+                    <div className="text-sm md:text-base font-bold tracking-tighter">
+                        SMARTHIGHLIGHT_V2.0
                     </div>
                     <div className="flex items-center gap-4">
+                        <ModeToggle />
                         {isSignedIn ? (
                             <button
                                 onClick={handleGetStarted}
-                                className="px-5 py-2.5 rounded-full bg-gray-900 text-white font-medium hover:bg-gray-800 transition-all hover:shadow-lg hover:-translate-y-0.5"
+                                className="px-4 py-2 text-sm border border-input bg-card text-foreground hover:bg-foreground hover:text-background transition-colors"
                             >
-                                Go to Dashboard
+                                [ SYSTEM_CORE ]
                             </button>
                         ) : (
                             <SignInButton mode="modal">
-                                <button className="px-5 py-2.5 rounded-full bg-white text-gray-900 font-medium border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all">
-                                    Sign In
+                                <button className="px-4 py-2 text-sm border border-muted-foreground hover:border-foreground text-muted-foreground hover:text-foreground transition-colors">
+                                    SIGN_IN
                                 </button>
                             </SignInButton>
                         )}
@@ -51,167 +83,236 @@ export function LandingPage() {
                 </nav>
 
                 {/* Hero Section */}
-                <main className="px-6 pt-20 pb-32 md:pt-32 md:pb-40 max-w-7xl mx-auto text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/50 backdrop-blur-sm border border-blue-100 shadow-sm text-blue-700 text-sm font-medium mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                        </span>
-                        New: Gemini 2.0 Integration
-                    </div>
+                <main className="flex-grow flex flex-col items-center justify-center text-center px-4 py-20 md:py-32">
 
-                    <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-8 leading-[1.1] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-                        Read Faster with <br />
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-                            AI-Powered Highlights
-                        </span>
+                    {/* ASCII Logo/Art */}
+                    <pre className="text-[10px] md:text-sm leading-none whitespace-pre text-foreground mb-8 select-none animate-in fade-in zoom-in duration-1000">
+                        {logoAscii}
+                    </pre>
+
+                    <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-6 text-foreground uppercase">
+                        Enhance Your <br />
+                        Reading Capability
                     </h1>
 
-                    <p className="text-xl md:text-2xl text-gray-500 max-w-3xl mx-auto mb-12 leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-                        Upload any PDF and let our advanced AI instantly identify and highlight the key insights, saving you hours of reading time.
+                    <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto mb-12 uppercase tracking-wide">
+                        // Upload PDF. AI Analysis. Instant Highlights. <br />
+                        // No distractions. Pure information.
                     </p>
 
-                    <div className="flex flex-col md:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+                    <div className="flex flex-col md:flex-row items-center gap-4">
                         {isSignedIn ? (
                             <button
                                 onClick={handleGetStarted}
-                                className="w-full md:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center gap-2 group"
+                                className="group relative px-8 py-4 bg-foreground text-background font-bold uppercase tracking-wider hover:bg-muted-foreground transition-all"
                             >
-                                Go to Dashboard <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                <span className="absolute inset-0 border-2 border-foreground translate-x-1 translate-y-1 group-hover:translate-x-2 group-hover:translate-y-2 transition-transform bg-background -z-10"></span>
+                                Launch System
                             </button>
                         ) : (
                             <SignInButton mode="modal">
-                                <button className="w-full md:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center gap-2 group">
-                                    Get Started for Free <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                <button className="group relative px-8 py-4 bg-foreground text-background font-bold uppercase tracking-wider hover:bg-muted-foreground transition-all">
+                                    <span className="absolute inset-0 border-2 border-foreground translate-x-1 translate-y-1 group-hover:translate-x-2 group-hover:translate-y-2 transition-transform bg-background -z-10"></span>
+                                    Initialize System
                                 </button>
                             </SignInButton>
                         )}
 
-                        <a href="#features" className="w-full md:w-auto px-8 py-4 rounded-full bg-white text-gray-700 font-bold text-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all flex items-center justify-center">
-                            Learn more
-                        </a>
                     </div>
 
-                    {/* Hero Image/Preview */}
-                    <div className="mt-20 relative mx-auto max-w-5xl rounded-2xl p-2 bg-gradient-to-b from-gray-200 to-transparent backdrop-blur-xl animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-500">
-                        <div className="relative rounded-xl overflow-hidden shadow-2xl border border-gray-200 bg-white aspect-[16/9] flex items-center justify-center">
-                            {/* Abstract representation of the app UI */}
-                            <div className="absolute inset-0 bg-gray-50 flex">
-                                <div className="w-1/3 border-r border-gray-200 p-6 space-y-4 hidden md:block">
-                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                                    <div className="h-32 bg-blue-50 rounded-xl border border-blue-100 p-3">
-                                        <div className="h-2 bg-blue-200 rounded w-1/2 mb-2"></div>
-                                        <div className="h-2 bg-blue-100 rounded w-full mb-1"></div>
-                                        <div className="h-2 bg-blue-100 rounded w-full mb-1"></div>
-                                    </div>
-                                    <div className="h-32 bg-white rounded-xl border border-gray-200 p-3">
-                                        <div className="h-2 bg-gray-200 rounded w-1/2 mb-2"></div>
-                                        <div className="h-2 bg-gray-100 rounded w-full mb-1"></div>
-                                        <div className="h-2 bg-gray-100 rounded w-full mb-1"></div>
-                                    </div>
+                    <div className="mt-24 md:mt-32 w-full max-w-4xl mx-auto border border-border p-2">
+                        <div className="border border-border p-8 md:p-12 bg-background/50 backdrop-blur-sm">
+                            <div className="flex flex-col md:flex-row items-center justify-around gap-12 font-mono text-xs md:text-sm">
+                                <div className="text-center group cursor-default">
+                                    <pre className="mb-4 text-muted-foreground group-hover:text-foreground transition-colors">{feature1Ascii}</pre>
+                                    <p className="uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Speed</p>
                                 </div>
-                                <div className="flex-1 p-8 flex items-center justify-center">
-                                    <div className="text-center space-y-4">
-                                        <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto">
-                                            <FileText className="w-8 h-8" />
-                                        </div>
-                                        <p className="text-gray-400 font-medium">Upload a PDF to see the magic</p>
-                                    </div>
+                                <div className="text-center group cursor-default">
+                                    <pre className="mb-4 text-muted-foreground group-hover:text-foreground transition-colors">{feature2Ascii}</pre>
+                                    <p className="uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Accuracy</p>
+                                </div>
+                                <div className="text-center group cursor-default">
+                                    <pre className="mb-4 text-muted-foreground group-hover:text-foreground transition-colors">{feature3Ascii}</pre>
+                                    <p className="uppercase tracking-widest text-muted-foreground group-hover:text-foreground">Security</p>
                                 </div>
                             </div>
-                            {/* Overlay Text */}
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/5 md:bg-transparent">
-                                <span className="md:hidden text-gray-500 font-medium">App Preview</span>
+                        </div>
+                    </div>
+
+                    {/* System Architecture / Explanation Section */}
+                    <div className="mt-32 w-full max-w-5xl mx-auto px-4 text-left mb-20">
+                        <div className="border-l-2 border-foreground pl-6 mb-16">
+                            <h2 className="text-2xl md:text-3xl font-bold uppercase tracking-tighter mb-2 text-foreground">
+                                System_Architecture
+                            </h2>
+                            <p className="text-muted-foreground max-w-2xl text-sm uppercase tracking-wide">
+                                // Detailed operational mechanics and data pipeline analysis.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+                            {/* Step 1 */}
+                            <div className="space-y-4 group">
+                                <div className="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest mb-2">[ PHASE_01: INGESTION ]</div>
+                                <pre className="text-xs md:text-sm text-gray-400 group-hover:text-white transition-colors leading-none whitespace-pre overflow-x-auto pb-4">
+                                    {`
+    +-------------+
+    |  PDF INPUT  |
+    +-----+-------+
+          |
+    [ ENCRYPTION ]
+          |
+    +-----v-------+
+    | SECURE BUS  |
+    +-------------+
+`}
+                                </pre>
+                                <h3 className="text-foreground font-bold uppercase">Document Parsing</h3>
+                                <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors leading-relaxed">
+                                    The system accepts PDF documents and immediately encrypts the data stream.
+                                    Text layers are extracted while preserving spatial coordinates for precise highlighting.
+                                </p>
+                            </div>
+
+                            {/* Step 2 */}
+                            <div className="space-y-4 group">
+                                <div className="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest mb-2">[ PHASE_02: ANALYSIS ]</div>
+                                <pre className="text-xs md:text-sm text-muted-foreground group-hover:text-foreground transition-colors leading-none whitespace-pre overflow-x-auto pb-4">
+                                    {`
+    +-------------+
+    | GEMINI 2.0  |
+    +-----+-------+
+          |
+   [ CTX WINDOW ]
+          |
+    +-----v-------+
+    |  SEMANTIC   |
+    |  MATCHING   |
+    +-------------+
+`}
+                                </pre>
+                                <h3 className="text-foreground font-bold uppercase">AI Processing</h3>
+                                <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors leading-relaxed">
+                                    Google's Gemini 2.0 model scans the content with a 1M+ token context window.
+                                    It identifies key concepts, definitions, and actionable insights based on semantic relevance.
+                                </p>
+                            </div>
+
+                            {/* Step 3 */}
+                            <div className="space-y-4 group">
+                                <div className="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest mb-2">[ PHASE_03: OUTPUT ]</div>
+                                <pre className="text-xs md:text-sm text-muted-foreground group-hover:text-foreground transition-colors leading-none whitespace-pre overflow-x-auto pb-4">
+                                    {`
+    +-------------+
+    | SYNTHESIS   |
+    +-----+-------+
+          |
+     [ RE-DRAW ]
+          |
+    +-----v-------+
+    | HIGHLIGHTED |
+    |     PDF     |
+    +-------------+
+`}
+                                </pre>
+                                <h3 className="text-foreground font-bold uppercase">Reconstruction</h3>
+                                <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors leading-relaxed">
+                                    The document is reconstructed with overlay layers containing the AI-identified highlights.
+                                    A side-panel summary is generated for quick navigation.
+                                </p>
+                            </div>
+
+                            {/* Step 4: Tech Stack or Stats */}
+                            <div className="border border-border p-6 hover:bg-muted/10 transition-colors">
+                                <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">[ SYSTEM_SPECS ]</div>
+                                <ul className="space-y-3 text-sm font-mono text-muted-foreground">
+                                    <li className="flex justify-between border-b border-border pb-2">
+                                        <span>MODEL_VERSION</span>
+                                        <span className="text-foreground">GEMINI-1.5-PRO</span>
+                                    </li>
+                                    <li className="flex justify-between border-b border-border pb-2">
+                                        <span>LATENCY</span>
+                                        <span className="text-foreground">&lt; 2500ms</span>
+                                    </li>
+                                    <li className="flex justify-between border-b border-border pb-2">
+                                        <span>ENCRYPTION</span>
+                                        <span className="text-foreground">AES-256</span>
+                                    </li>
+                                    <li className="flex justify-between pt-2">
+                                        <span>UPTIME</span>
+                                        <span className="text-green-500">99.99%</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div className="w-full max-w-6xl mx-auto px-4 text-left mb-32">
+                        <div className="border-l-2 border-foreground pl-6 mb-16">
+                            <h2 className="text-2xl md:text-3xl font-bold uppercase tracking-tighter mb-2 text-foreground">
+                                Core_Capabilities
+                            </h2>
+                            <p className="text-muted-foreground max-w-2xl text-sm uppercase tracking-wide">
+                                // Advanced features powering the next generation of document analysis.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Feature 1 */}
+                            <div className="border border-border p-6 hover:bg-muted/10 transition-colors group">
+                                <div className="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest mb-4">[ SEMANTIC_UNDERSTANDING ]</div>
+                                <h3 className="text-lg font-bold uppercase mb-2">Context-Aware Analysis</h3>
+                                <p className="text-sm text-muted-foreground font-mono leading-relaxed">
+                                    Unlike simple keyword search, our AI understands the semantic meaning of your document to highlight what truly matters.
+                                </p>
+                            </div>
+
+                            {/* Feature 2 */}
+                            <div className="border border-border p-6 hover:bg-muted/10 transition-colors group">
+                                <div className="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest mb-4">[ RAPID_SYNTHESIS ]</div>
+                                <h3 className="text-lg font-bold uppercase mb-2">Instant Summarization</h3>
+                                <p className="text-sm text-muted-foreground font-mono leading-relaxed">
+                                    Get immediate, high-level summaries of complex technical documents, legal contracts, and academic papers.
+                                </p>
+                            </div>
+
+                            {/* Feature 3 */}
+                            <div className="border border-border p-6 hover:bg-muted/10 transition-colors group">
+                                <div className="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest mb-4">[ DIRECT_LINK ]</div>
+                                <h3 className="text-lg font-bold uppercase mb-2">Interactive Navigation</h3>
+                                <p className="text-sm text-muted-foreground font-mono leading-relaxed">
+                                    Click on any summary point to instantly jump to the relevant section in the PDF.
+                                </p>
+                            </div>
+
+                            {/* Feature 4 */}
+                            <div className="border border-border p-6 hover:bg-muted/10 transition-colors group">
+                                <div className="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest mb-4">[ ZERO_KNOWLEDGE ]</div>
+                                <h3 className="text-lg font-bold uppercase mb-2">Secure Processing</h3>
+                                <p className="text-sm text-muted-foreground font-mono leading-relaxed">
+                                    Your data is encrypted at rest and in transit. We prioritize privacy with a zero-retention policy for processed files.
+                                </p>
                             </div>
                         </div>
                     </div>
                 </main>
 
-                {/* Features Section */}
-                <section id="features" className="py-24 bg-white">
-                    <div className="max-w-7xl mx-auto px-6">
-                        <div className="text-center mb-16">
-                            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">Why SmartHighlight?</h2>
-                            <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-                                Stop skimming and start understanding. Our AI does the heavy lifting for you.
-                            </p>
-                        </div>
-
-                        <div className="grid md:grid-cols-3 gap-8 md:gap-12">
-                            {[
-                                {
-                                    icon: <Zap className="w-6 h-6 text-yellow-500" />,
-                                    title: "Lightning Fast",
-                                    description: "Process extensive documents in seconds using the latest Gemini Flash models."
-                                },
-                                {
-                                    icon: <CheckCircle2 className="w-6 h-6 text-green-500" />,
-                                    title: "Precision Accuracy",
-                                    description: "Advanced context understanding ensures only the most relevant information is highlighted."
-                                },
-                                {
-                                    icon: <Shield className="w-6 h-6 text-blue-500" />,
-                                    title: "Secure & Private",
-                                    description: "Your documents are processed securely and never shared with third parties."
-                                }
-                            ].map((feature, index) => (
-                                <div key={index} className="p-8 rounded-3xl bg-gray-50 border border-gray-100 hover:border-blue-100 hover:shadow-lg transition-all group">
-                                    <div className="w-12 h-12 bg-white rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                                        {feature.icon}
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                                    <p className="text-gray-500 leading-relaxed">
-                                        {feature.description}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                {/* CTA Section */}
-                <section className="py-24 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-blue-600">
-                        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
-                    </div>
-
-                    <div className="relative z-10 max-w-4xl mx-auto px-6 text-center text-white">
-                        <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to transform your reading?</h2>
-                        <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-                            Join thousands of students and professionals who save time with SmartHighlight.
-                        </p>
-
-                        {!isSignedIn ? (
-                            <SignInButton mode="modal">
-                                <button className="px-10 py-5 rounded-full bg-white text-blue-600 font-bold text-xl hover:bg-blue-50 transition-all shadow-xl hover:scale-105 active:scale-95">
-                                    Get Started for Free
-                                </button>
-                            </SignInButton>
-                        ) : (
-                            <button
-                                onClick={handleGetStarted}
-                                className="px-10 py-5 rounded-full bg-white text-blue-600 font-bold text-xl hover:bg-blue-50 transition-all shadow-xl hover:scale-105 active:scale-95"
-                            >
-                                Go to Dashboard
-                            </button>
-                        )}
-                    </div>
-                </section>
-
                 {/* Footer */}
-                <footer className="bg-gray-50 border-t border-gray-200 py-12">
-                    <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-                        <div className="text-gray-400 text-sm">
-                            © 2026 SmartHighlight. All rights reserved.
+                <footer className="border-t border-border py-12 px-6">
+                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-muted-foreground uppercase tracking-widest">
+                        <div>
+                            System Status: <span className="text-green-500">ONLINE</span>
                         </div>
-                        <div className="flex gap-6">
-                            <a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Privacy Policy</a>
-                            <a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Terms of Service</a>
-                            <a href="#" className="text-gray-500 hover:text-gray-900 transition-colors">Contact</a>
+                        <div className="flex gap-8">
+                            <span className="hover:text-foreground cursor-pointer">[ GITHUB ]</span>
+                            <span className="hover:text-foreground cursor-pointer">[ TWITTER ]</span>
+                        </div>
+                        <div>
+                            &copy; 2026 SmartHighlight
                         </div>
                     </div>
                 </footer>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

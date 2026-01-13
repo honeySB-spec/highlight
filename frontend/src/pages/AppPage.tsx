@@ -4,10 +4,9 @@ import { UploadZone } from '../components/UploadZone';
 import { AnalysisControls } from '../components/AnalysisControls';
 import { Results } from '../components/Results';
 import { PDFViewer } from '../components/PDFViewer';
-import { BookOpen, Github, ArrowLeft } from 'lucide-react';
 import { HighlightPanel } from '../components/HighlightPanel';
 import { ProgressBar } from '../components/ui/ProgressBar';
-import { Link } from 'react-router-dom';
+import { ModeToggle } from '../components/mode-toggle';
 
 interface Highlight {
     phrase: string;
@@ -23,7 +22,7 @@ interface ProcessResult {
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-export function Dashboard() {
+export function AppPage() {
     const { getToken } = useAuth();
     const [filename, setFilename] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -142,6 +141,7 @@ export function Dashboard() {
         }
     };
 
+    // Removed handleUpgrade function as minimal theme might not emphasize upgrades immediately or styling needs update
     const handleUpgrade = async () => {
         try {
             const token = await getToken();
@@ -165,32 +165,33 @@ export function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-[#FDFCFD] text-gray-900 font-sans selection:bg-blue-100">
-            {/* Background Gradients */}
-            <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-100/40 rounded-full blur-[128px]" />
-                <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-indigo-100/40 rounded-full blur-[128px]" />
+        <div className="min-h-screen bg-background text-foreground font-mono selection:bg-primary selection:text-primary-foreground">
+            <div className="fixed inset-0 z-0 opacity-10 pointer-events-none"
+                style={{ backgroundImage: 'linear-gradient(var(--color-border) 1px, transparent 1px), linear-gradient(90deg, var(--color-border) 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
             </div>
 
-            <div className="relative z-10 max-w-6xl mx-auto px-6 py-8">
+            <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
 
                 {/* Navigation / Header */}
-                <div className="flex items-center justify-between mb-12">
-                    <Link to="/" className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors">
-                        <ArrowLeft className="w-4 h-4" /> Back to Home
-                    </Link>
+                <div className="flex items-center justify-between mb-12 border-b border-border pb-4">
+                    <div className="text-sm md:text-base font-bold tracking-tighter">
+                        SMARTHIGHLIGHT_V2.0
+                    </div>
 
                     <div className="flex items-center gap-4">
+                        <ModeToggle />
                         <SignedIn>
-                            <button onClick={handleUpgrade} className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold rounded-full shadow-md hover:shadow-lg transition-all text-sm hover:-translate-y-0.5">
-                                Upgrade to Pro
+                            <button onClick={handleUpgrade} className="px-3 py-1 bg-background border border-yellow-600 text-yellow-500 hover:bg-yellow-600 hover:text-background transition-colors text-xs font-bold uppercase tracking-wider">
+                                [ PRO_ACCESS ]
                             </button>
-                            <UserButton />
+                            <div className="filter grayscale hover:grayscale-0 transition-all">
+                                <UserButton />
+                            </div>
                         </SignedIn>
                         <SignedOut>
                             <SignInButton mode="modal">
-                                <button className="px-4 py-2 rounded-lg bg-gray-900 text-white font-medium hover:bg-gray-800 transition-colors">
-                                    Sign In
+                                <button className="px-4 py-2 border border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors uppercase text-sm">
+                                    [ AUTHENTICATE ]
                                 </button>
                             </SignInButton>
                         </SignedOut>
@@ -198,12 +199,12 @@ export function Dashboard() {
                 </div>
 
                 {/* Header */}
-                <header className="mb-12 text-center space-y-4">
-                    <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900">
-                        Dashboard
+                <header className="mb-12 space-y-2">
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground uppercase">
+                        // System_Core
                     </h1>
-                    <p className="text-gray-500">
-                        Upload and manage your documents
+                    <p className="text-muted-foreground text-sm uppercase tracking-wide">
+                        Ready for input...
                     </p>
                 </header>
 
@@ -211,7 +212,7 @@ export function Dashboard() {
                 <div className="space-y-8">
                     <SignedIn>
                         {/* Upload Section */}
-                        <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 max-w-2xl mx-auto">
+                        <div className="max-w-3xl mx-auto border border-border p-1 bg-background">
                             <UploadZone
                                 onFileSelect={handleFileSelect}
                                 isUploading={isUploading}
@@ -220,8 +221,8 @@ export function Dashboard() {
 
                         {/* Error Message */}
                         {error && (
-                            <div className="p-4 rounded-xl bg-red-50 text-red-600 border border-red-100 text-center animate-in shake max-w-2xl mx-auto">
-                                {error}
+                            <div className="p-4 border border-destructive bg-destructive/10 text-destructive font-bold uppercase tracking-wide text-center max-w-2xl mx-auto">
+                                [ ERROR: {error} ]
                             </div>
                         )}
 
@@ -229,32 +230,39 @@ export function Dashboard() {
                         {/* Controls Section - Only show if file is uploaded */}
                         {filename && (
                             <>
-                                <div className="max-w-2xl mx-auto">
-                                    <AnalysisControls
-                                        onAnalyze={handleAnalyze}
-                                        isProcessing={isProcessing}
-                                        disabled={isUploading || isProcessing}
-                                    />
-                                    {progress && (
-                                        <ProgressBar
-                                            progress={progress.total > 0 ? (progress.current / progress.total) * 100 : 0}
-                                            message={progress.message}
-                                            className="mt-4"
+                                <div className="max-w-3xl mx-auto">
+                                    <div className="border border-border p-4 bg-background">
+                                        <AnalysisControls
+                                            onAnalyze={handleAnalyze}
+                                            isProcessing={isProcessing}
+                                            disabled={isUploading || isProcessing}
                                         />
-                                    )}
+                                        {progress && (
+                                            <div className="mt-4">
+                                                <div className="flex justify-between text-xs text-gray-500 mb-1 uppercase">
+                                                    <span>Progress</span>
+                                                    <span>{(progress.total > 0 ? (progress.current / progress.total) * 100 : 0).toFixed(0)}%</span>
+                                                </div>
+                                                <ProgressBar
+                                                    progress={progress.total > 0 ? (progress.current / progress.total) * 100 : 0}
+                                                    message={progress.message}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Application Layout: PDF + Panel */}
                                 {result && (
-                                    <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+                                    <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
 
                                         {/* Left Column: PDF Viewer */}
-                                        <div className="lg:col-span-2 space-y-4">
-                                            <h3 className="text-lg font-semibold text-gray-700 flex items-center justify-between">
-                                                <span>Highlighted Document</span>
-                                                <span className="text-sm font-normal text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100">Analysis Complete</span>
+                                        <div className="space-y-2">
+                                            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex justify-between">
+                                                <span>[ SOURCE_DOCUMENT ]</span>
+                                                <span className="text-green-500">[ PROCESSED ]</span>
                                             </h3>
-                                            <div className="h-[600px] bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                                            <div className="h-[600px] bg-muted border border-border overflow-hidden">
                                                 <PDFViewer
                                                     url={`${API_URL}${result.download_url}`}
                                                 />
@@ -262,11 +270,11 @@ export function Dashboard() {
                                         </div>
 
                                         {/* Right Column: Highlights Panel */}
-                                        <div className="space-y-4">
-                                            <h3 className="text-lg font-semibold text-gray-700">
-                                                Analysis Results
+                                        <div className="space-y-2">
+                                            <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+                                                [ EXTRACTION_RESULTS ]
                                             </h3>
-                                            <div className="h-[600px]">
+                                            <div className="h-[600px] border border-border bg-background">
                                                 <HighlightPanel highlights={result.highlights} />
                                             </div>
                                         </div>
@@ -276,7 +284,7 @@ export function Dashboard() {
 
                                 {/* Legacy Results Section (Optional - kept for download button) */}
                                 {result && (
-                                    <div className="max-w-2xl mx-auto mt-8">
+                                    <div className="max-w-2xl mx-auto mt-8 border-t border-gray-800 pt-8">
                                         <Results
                                             matchCount={result.matches}
                                             downloadUrl={result.download_url}
@@ -289,11 +297,13 @@ export function Dashboard() {
                     </SignedIn>
 
                     <SignedOut>
-                        <div className="text-center py-20 animate-in fade-in zoom-in duration-500">
-                            <h2 className="text-2xl font-bold mb-6 text-gray-800">Sign in to start analyzing PDFs</h2>
+                        <div className="text-center py-20 border border-border border-dashed">
+                            <h2 className="text-xl font-bold mb-6 text-foreground uppercase tracking-wider">Authentication Required</h2>
+                            ;
+
                             <SignInButton mode="modal">
-                                <button className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
-                                    Get Started for Free
+                                <button className="px-8 py-4 bg-foreground text-background font-bold uppercase hover:bg-muted-foreground transition-all">
+                                    [ INITIALIZE_SESSION ]
                                 </button>
                             </SignInButton>
                         </div>
@@ -301,14 +311,12 @@ export function Dashboard() {
                 </div>
 
                 {/* Footer */}
-                <footer className="mt-32 text-center text-gray-400 text-sm flex items-center justify-center gap-6">
-                    <div className="flex items-center gap-2 hover:text-gray-600 transition-colors cursor-pointer">
-                        <BookOpen className="w-4 h-4" />
-                        <span>Documentation</span>
+                <footer className="mt-32 text-center text-muted-foreground text-xs uppercase tracking-widest flex items-center justify-center gap-6 border-t border-border pt-8">
+                    <div className="flex items-center gap-2 hover:text-foreground transition-colors cursor-pointer">
+                        <span>[ DOCS ]</span>
                     </div>
-                    <div className="flex items-center gap-2 hover:text-gray-600 transition-colors cursor-pointer">
-                        <Github className="w-4 h-4" />
-                        <span>Source Code</span>
+                    <div className="flex items-center gap-2 hover:text-foreground transition-colors cursor-pointer">
+                        <span>[ SOURCE ]</span>
                     </div>
                 </footer>
 

@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, CheckCircle, Loader2 } from 'lucide-react';
-import { cn } from '../lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '../lib/utils'; // Keep existing utility
 
 interface UploadZoneProps {
     onFileSelect: (file: File) => void;
@@ -49,55 +48,63 @@ export function UploadZone({ onFileSelect, isUploading }: UploadZoneProps) {
     };
 
     return (
-        <Card
+        <div
             className={cn(
-                "relative cursor-pointer overflow-hidden transition-all duration-300 ease-in-out border-2 border-dashed",
-                isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",
-                fileName ? "border-green-500/50 bg-green-50/30" : ""
+                "relative cursor-pointer overflow-hidden transition-all duration-200 border-2 border-dashed h-64 flex flex-col items-center justify-center p-8 bg-card hover:bg-muted/50 group",
+                isDragging ? "border-primary bg-muted" : "border-border hover:border-primary",
+                fileName ? "border-primary bg-card" : ""
             )}
             onClick={triggerFileInput}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
         >
-            <CardContent className="h-64 flex flex-col items-center justify-center p-8">
-                <input
-                    type="file"
-                    className="hidden"
-                    ref={fileInputRef}
-                    accept="application/pdf"
-                    onChange={handleFileInput}
-                />
+            <input
+                type="file"
+                className="hidden"
+                ref={fileInputRef}
+                accept="application/pdf"
+                onChange={handleFileInput}
+            />
 
-                <div className="flex flex-col items-center gap-4 text-center z-10 transition-transform duration-300">
-                    <div className={cn(
-                        "p-4 rounded-full transition-all duration-500",
-                        fileName ? "bg-green-100 text-green-600" : "bg-muted text-muted-foreground group-hover:scale-110 group-hover:bg-primary/10 group-hover:text-primary"
-                    )}>
-                        {isUploading ? (
-                            <Loader2 className="w-8 h-8 animate-spin" />
-                        ) : fileName ? (
-                            <CheckCircle className="w-8 h-8" />
-                        ) : (
-                            <Upload className="w-8 h-8" />
-                        )}
-                    </div>
-
-                    <div className="space-y-1">
-                        <h3 className={cn(
-                            "text-lg font-semibold transition-colors duration-300",
-                            fileName ? "text-green-700" : "text-foreground"
-                        )}>
-                            {isUploading ? "Uploading..." : fileName ? "PDF Uploaded" : "Upload your PDF"}
-                        </h3>
-                        <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                            {fileName
-                                ? fileName
-                                : "Drag & drop or click to browse. Only PDF files are supported."}
-                        </p>
-                    </div>
+            <div className="flex flex-col items-center gap-6 text-center z-10 font-mono">
+                <div className={cn(
+                    "p-0 transition-transform duration-300",
+                    isUploading ? "animate-spin" : ""
+                )}>
+                    {isUploading ? (
+                        <Loader2 className="w-10 h-10 text-primary" />
+                    ) : fileName ? (
+                        <CheckCircle className="w-10 h-10 text-primary" />
+                    ) : (
+                        <Upload className="w-10 h-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                    )}
                 </div>
-            </CardContent>
-        </Card>
+
+                <div className="space-y-2 uppercase tracking-wide">
+                    <h3 className={cn(
+                        "text-lg font-bold transition-colors",
+                        fileName ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                    )}>
+                        {isUploading ? ">> UPLOADING_DATA..." : fileName ? ">> FILE_ACQUIRED" : ">> INITIATE_UPLOAD"}
+                    </h3>
+                    <p className="text-xs text-muted-foreground group-hover:text-muted-foreground/80">
+                        {fileName
+                            ? `[ ${fileName} ]`
+                            : "[ DROP PDF HERE OR CLICK TO BROWSE ]"}
+                    </p>
+                </div>
+            </div>
+
+            {/* Corner Accents */}
+            {!fileName && (
+                <>
+                    <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-border group-hover:border-primary transition-colors"></div>
+                    <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-border group-hover:border-primary transition-colors"></div>
+                    <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-border group-hover:border-primary transition-colors"></div>
+                    <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-border group-hover:border-primary transition-colors"></div>
+                </>
+            )}
+        </div>
     );
 }
