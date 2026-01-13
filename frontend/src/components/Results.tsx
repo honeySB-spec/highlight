@@ -12,9 +12,10 @@ interface ResultsProps {
 export function Results({ matchCount, downloadUrl }: ResultsProps) {
     const [isDownloading, setIsDownloading] = useState(false);
 
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
     const fullDownloadUrl = downloadUrl.startsWith('http')
         ? downloadUrl
-        : `http://localhost:5001${downloadUrl}`;
+        : `${API_URL}${downloadUrl}`;
 
     // Extract filename from URL or default to 'highlighted.pdf'
     const fileName = fullDownloadUrl.split('/').pop() || 'highlighted.pdf';

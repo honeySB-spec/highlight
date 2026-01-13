@@ -1,10 +1,12 @@
 import os
-from flask import Flask, request, jsonify, send_file, send_from_directory
+from flask import Flask, request, jsonify, send_file, send_from_directory, g
 from flask_cors import CORS
 import fitz  # PyMuPDF
 import werkzeug.utils
 import sys
+import stripe
 import json
+from auth import login_required
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -15,6 +17,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 
 @app.route('/upload', methods=['POST'])
+@login_required
 def upload_file():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
@@ -29,6 +32,7 @@ def upload_file():
     return jsonify({'message': 'File uploaded successfully', 'filename': filename}), 200
 
 @app.route('/analyze', methods=['POST'])
+@login_required
 def analyze_pdf():
     data = request.json
     filename = data.get('filename')
@@ -151,6 +155,55 @@ def download_file(filename):
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
+
+@app.route('/create-checkout-session', methods=['POST'])
+@login_required
+def create_checkout_session():
+    stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            line_items=[
+                {
+                    'price': os.getenv('STRIPE_PRICE_ID'),
+                    'quantity': 1,
+                },
+            ],
+            mode='subscription',
+            success_url='http://localhost:5173/?success=true',
+            cancel_url='http://localhost:5173/?canceled=true',
+            metadata={
+                 'user_id': getattr(g, 'user_id', 'unknown')
+            }
+        )
+    except Exception as e:
+        return jsonify({'error': str(e)}), 403
+
+    return jsonify({'url': checkout_session.url})
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    payload = request.get_data()
+    sig_header = request.headers.get('Stripe-Signature')
+    endpoint_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
+
+    if not endpoint_secret:
+         return 'Webhook secret not set', 500
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        return 'Invalid payload', 400
+    except stripe.error.SignatureVerificationError as e:
+        return 'Invalid signature', 400
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        user_id = session.get('metadata', {}).get('user_id')
+        print(f"Payment successful for user: {user_id}")
+
+    return '', 200
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001, host='0.0.0.0')

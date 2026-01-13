@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from "@clerk/clerk-react";
 import { UploadZone } from './components/UploadZone';
 import { AnalysisControls } from './components/AnalysisControls';
 import { Results } from './components/Results';
@@ -19,7 +20,10 @@ interface ProcessResult {
   highlights: Highlight[];
 }
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 function App() {
+  const { getToken } = useAuth();
   const [filename, setFilename] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -38,8 +42,12 @@ function App() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:5001/upload', {
+      const token = await getToken();
+      const response = await fetch(`${API_URL}/upload`, {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData,
       });
 
@@ -66,10 +74,12 @@ function App() {
     setProgress({ current: 0, total: 100, message: 'Starting...' });
 
     try {
-      const response = await fetch('http://localhost:5001/analyze', {
+      const token = await getToken();
+      const response = await fetch(`${API_URL}/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           filename,
@@ -131,6 +141,28 @@ function App() {
     }
   };
 
+  const handleUpgrade = async () => {
+    try {
+      const token = await getToken();
+      const response = await fetch(`${API_URL}/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("Failed to start checkout", data);
+        alert("Failed to start checkout");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error starting checkout");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#FDFCFD] text-gray-900 font-sans selection:bg-blue-100">
       {/* Background Gradients */}
@@ -157,85 +189,115 @@ function App() {
           </p>
         </header>
 
+        <div className="absolute top-4 right-4 md:top-8 md:right-8">
+          <SignedIn>
+            <div className="flex items-center gap-4">
+              <button onClick={handleUpgrade} className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold rounded-full shadow-md hover:shadow-lg transition-all text-sm hover:-translate-y-0.5">
+                Upgrade to Pro
+              </button>
+              <UserButton />
+            </div>
+          </SignedIn>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className="px-4 py-2 rounded-lg bg-gray-900 text-white font-medium hover:bg-gray-800 transition-colors">
+                Sign In
+              </button>
+            </SignInButton>
+          </SignedOut>
+        </div>
+
         {/* Main Content */}
         <div className="space-y-8">
-
-          {/* Upload Section */}
-          <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 max-w-2xl mx-auto">
-            <UploadZone
-              onFileSelect={handleFileSelect}
-              isUploading={isUploading}
-            />
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="p-4 rounded-xl bg-red-50 text-red-600 border border-red-100 text-center animate-in shake max-w-2xl mx-auto">
-              {error}
+          <SignedIn>
+            {/* Upload Section */}
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 max-w-2xl mx-auto">
+              <UploadZone
+                onFileSelect={handleFileSelect}
+                isUploading={isUploading}
+              />
             </div>
-          )}
 
-
-          {/* Controls Section - Only show if file is uploaded */}
-          {filename && (
-            <>
-              <div className="max-w-2xl mx-auto">
-                <AnalysisControls
-                  onAnalyze={handleAnalyze}
-                  isProcessing={isProcessing}
-                  disabled={isUploading || isProcessing}
-                />
-                {progress && (
-                  <ProgressBar
-                    progress={progress.total > 0 ? (progress.current / progress.total) * 100 : 0}
-                    message={progress.message}
-                    className="mt-4"
-                  />
-                )}
+            {/* Error Message */}
+            {error && (
+              <div className="p-4 rounded-xl bg-red-50 text-red-600 border border-red-100 text-center animate-in shake max-w-2xl mx-auto">
+                {error}
               </div>
+            )}
 
-              {/* Application Layout: PDF + Panel */}
-              {result && (
-                <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
 
-                  {/* Left Column: PDF Viewer */}
-                  <div className="lg:col-span-2 space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-700 flex items-center justify-between">
-                      <span>Highlighted Document</span>
-                      <span className="text-sm font-normal text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100">Analysis Complete</span>
-                    </h3>
-                    <div className="h-[600px] bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-                      <PDFViewer
-                        url={`http://localhost:5001${result.download_url}`}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Right Column: Highlights Panel */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-700">
-                      Analysis Results
-                    </h3>
-                    <div className="h-[600px]">
-                      <HighlightPanel highlights={result.highlights} />
-                    </div>
-                  </div>
-
-                </div>
-              )}
-
-              {/* Legacy Results Section (Optional - kept for download button) */}
-              {result && (
-                <div className="max-w-2xl mx-auto mt-8">
-                  <Results
-                    matchCount={result.matches}
-                    downloadUrl={result.download_url}
+            {/* Controls Section - Only show if file is uploaded */}
+            {filename && (
+              <>
+                <div className="max-w-2xl mx-auto">
+                  <AnalysisControls
+                    onAnalyze={handleAnalyze}
+                    isProcessing={isProcessing}
+                    disabled={isUploading || isProcessing}
                   />
+                  {progress && (
+                    <ProgressBar
+                      progress={progress.total > 0 ? (progress.current / progress.total) * 100 : 0}
+                      message={progress.message}
+                      className="mt-4"
+                    />
+                  )}
                 </div>
-              )}
-            </>
-          )}
 
+                {/* Application Layout: PDF + Panel */}
+                {result && (
+                  <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
+
+                    {/* Left Column: PDF Viewer */}
+                    <div className="lg:col-span-2 space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-700 flex items-center justify-between">
+                        <span>Highlighted Document</span>
+                        <span className="text-sm font-normal text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100">Analysis Complete</span>
+                      </h3>
+                      <div className="h-[600px] bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                        <PDFViewer
+                          url={`${API_URL}${result.download_url}`}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Right Column: Highlights Panel */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-700">
+                        Analysis Results
+                      </h3>
+                      <div className="h-[600px]">
+                        <HighlightPanel highlights={result.highlights} />
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+
+                {/* Legacy Results Section (Optional - kept for download button) */}
+                {result && (
+                  <div className="max-w-2xl mx-auto mt-8">
+                    <Results
+                      matchCount={result.matches}
+                      downloadUrl={result.download_url}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+
+          </SignedIn>
+
+          <SignedOut>
+            <div className="text-center py-20 animate-in fade-in zoom-in duration-500">
+              <h2 className="text-2xl font-bold mb-6 text-gray-800">Sign in to start analyzing PDFs</h2>
+              <SignInButton mode="modal">
+                <button className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">
+                  Get Started for Free
+                </button>
+              </SignInButton>
+            </div>
+          </SignedOut>
         </div>
 
         {/* Footer */}

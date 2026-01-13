@@ -1,0 +1,10 @@
+flask
+flask-cors
+pymupdf
+google-generativeai
+python-dotenv
+stripe
+pyjwt
+cryptography
+requests
+gunicorn
