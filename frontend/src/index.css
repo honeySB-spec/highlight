@@ -123,3 +123,44 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-muted-foreground);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  opacity: 0.5;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-foreground);
+}
+
+/* React PDF Text Layer fix for overwriting text */
+
+/* React PDF Text Layer fix */
+.react-pdf__Page__textContent {
+  z-index: 10;
+}
+
+.react-pdf__Page__textContent span {
+  color: transparent;
+  cursor: text;
+  opacity: 0;
+  /* Ensure it is invisible */
+}
+
+::selection {
+  background: rgba(33, 150, 243, 0.3);
+  color: transparent;
+}
