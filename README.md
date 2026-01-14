@@ -1,3 +1,5 @@
+# LINK: https://highlight-ai.vercel.app/
+
 # Highlight
 
 Highlight is an intelligent PDF analysis and study companion that uses Google's Gemini AI to automatically identify and highlight key concepts in your documents. It provides a modern, distraction-free environment for reviewing and studying materials.
