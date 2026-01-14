@@ -23,7 +23,7 @@ def analyze_page(text):
         raise ValueError("Gemini API Key is missing. Please set GEMINI_API_KEY in .env")
         
     # Use flash lite model which might have better availability
-    model = genai.GenerativeModel('models/gemini-2.5-flash-lite')
+    model = genai.GenerativeModel('models/gemini-3-flash-preview')
     
     prompt = f""" Please read through this PDF document carefully. Identify and extract the most important key points, main ideas, and crucial facts that are essential for understanding the content. Summarize these points concisely and highlight them directly within the context of the notes. Focus only on what is necessary for retaining and reviewing the material efficiently, avoiding any less relevant information. Present the highlights in a clear, organized manner to make the document easier to study and review.
     Return a valid JSON list of objects: [{{"phrase": "exact text", "details": "why"}}]
@@ -41,7 +41,7 @@ def analyze_page(text):
     import random
     
     max_retries = 2
-    base_delay = 9
+    base_delay = 20
     
     for attempt in range(max_retries):
         try:
