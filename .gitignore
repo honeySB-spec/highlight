@@ -5,3 +5,8 @@ backend/.env
 backend/backend_debug.log
 frontend/node_modules/
 .DS_Store
+
+# Root level runtime files
+uploads/
+processed/
+.env

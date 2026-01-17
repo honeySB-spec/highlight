@@ -1,4 +1,9 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
 from flask import Flask, request, jsonify, send_file, send_from_directory, g
 from flask_cors import CORS
 import fitz  # PyMuPDF
@@ -94,7 +99,13 @@ def analyze_pdf():
 
                 # Highlight each phrase
                 for item in items_to_highlight:
-                    phrase = item.get('phrase')
+                    if isinstance(item, str):
+                        phrase = item
+                        details = "Important point"
+                    else:
+                        phrase = item.get('phrase')
+                        details = item.get('details', 'No details available')
+
                     if not phrase:
                         continue
                         
@@ -115,7 +126,7 @@ def analyze_pdf():
                     # Store for frontend
                     all_highlights.append({
                         'phrase': phrase,
-                        'details': item.get('details', 'No details available'),
+                        'details': details,
                         'page': page_num + 1
                     })
                     
