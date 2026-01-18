@@ -38,9 +38,9 @@ def upload_file():
     
     return jsonify({'message': 'File uploaded successfully', 'filename': filename}), 200
 
-@app.route('/analyze', methods=['POST'])
+@app.route('/extract-text', methods=['POST'])
 @login_required
-def analyze_pdf():
+def extract_text():
     data = request.json
     filename = data.get('filename')
     
@@ -50,113 +50,27 @@ def analyze_pdf():
     input_path = os.path.join(UPLOAD_FOLDER, filename)
     if not os.path.exists(input_path):
         return jsonify({'error': 'File not found'}), 404
-        
+
     try:
-        from analyzer import analyze_page
-    except ImportError:
-         return jsonify({'error': 'Analyzer module not found or dependencies missing'}), 500
+        doc = fitz.open(input_path)
+        pages_data = []
+        
+        for page_num, page in enumerate(doc):
+            text = page.get_text()
+            # Basic cleanup
+            text = " ".join(text.split())
+            if text:
+                pages_data.append({
+                    'page': page_num + 1,
+                    'text': text
+                })
+        
+        doc.close()
+        return jsonify({'pages': pages_data}), 200
 
-    def generate_analysis_progress():
-        try:
-            doc = fitz.open(input_path)
-            total_pages = len(doc)
-            total_matches = 0
-            all_highlights = []
-            
-            # Yield initial progress
-            yield json.dumps({
-                'type': 'progress', 
-                'current': 0, 
-                'total': total_pages, 
-                'message': 'Starting analysis...'
-            }) + '\n'
-
-            for page_num, page in enumerate(doc):
-                # Update progress for current page
-                yield json.dumps({
-                    'type': 'progress',
-                    'current': page_num + 1,
-                    'total': total_pages,
-                    'message': f'Analyzing page {page_num + 1} of {total_pages}...'
-                }) + '\n'
-
-                text = page.get_text()
-                if not text.strip():
-                    continue
-                    
-                # Small delay to help avoid rate limits between pages
-                import time
-                time.sleep(1)
-                
-                # Get phrases to highlight from Gemini
-                try:
-                    items_to_highlight = analyze_page(text)
-                except Exception as e:
-                    print(f"Error analyzing page {page_num+1}: {e}")
-                    yield json.dumps({
-                        'type': 'error',
-                        'message': f"Analysis failed on page {page_num+1}: {str(e)}"
-                    }) + '\n'
-                    return # Stop processing on fatal error
-
-                # Highlight each phrase
-                for item in items_to_highlight:
-                    if isinstance(item, str):
-                        phrase = item
-                        details = "Important point"
-                    else:
-                        phrase = item.get('phrase')
-                        details = item.get('details', 'No details available')
-
-                    if not phrase:
-                        continue
-                        
-                    # Search for the phrase (case-insensitive by default in newer PyMuPDF, but let's be sure)
-                    text_instances = page.search_for(phrase)
-
-                    if not text_instances:
-                        print(f"Warning: Phrase not found on page {page_num+1}: '{phrase}'")
-                    else:
-                        print(f"Highlighted on page {page_num+1}: '{phrase}' ({len(text_instances)} matches)")
-
-                    # Add highlight annotation for each instance
-                    for inst in text_instances:
-                        highlight = page.add_highlight_annot(inst)
-                        highlight.update()
-                        total_matches += 1
-                    
-                    # Store for frontend
-                    all_highlights.append({
-                        'phrase': phrase,
-                        'details': details,
-                        'page': page_num + 1
-                    })
-                    
-            output_filename = f"analyzed_{filename}"
-            output_path = os.path.join(PROCESSED_FOLDER, output_filename)
-            doc.save(output_path)
-            doc.close()
-            
-            # Yield completion result
-            yield json.dumps({
-                'type': 'complete',
-                'data': {
-                    'message': 'Analysis complete',
-                    'matches': total_matches,
-                    'download_url': f'/download/{output_filename}',
-                    'highlights': all_highlights
-                }
-            }) + '\n'
-
-        except Exception as e:
-            print(f"Error during analysis: {e}")
-            yield json.dumps({
-                'type': 'error',
-                'message': str(e)
-            }) + '\n'
-
-    from flask import Response, stream_with_context
-    return Response(stream_with_context(generate_analysis_progress()), mimetype='application/json')
+    except Exception as e:
+        print(f"Error extracting text: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/download/<filename>', methods=['GET'])
 def download_file(filename):

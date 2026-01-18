@@ -7,6 +7,8 @@ import { PDFViewer } from '../components/PDFViewer';
 import { HighlightPanel } from '../components/HighlightPanel';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { ModeToggle } from '../components/mode-toggle';
+import { aiAnalyzer } from '../services/ai';
+import type { InitProgressReport } from '@mlc-ai/web-llm';
 
 interface Highlight {
     phrase: string;
@@ -71,70 +73,79 @@ export function AppPage() {
         setIsProcessing(true);
         setError(null);
         setResult(null);
-        setProgress({ current: 0, total: 100, message: 'Starting...' });
 
         try {
+            // Step 1: Initialize AI Engine
+            setProgress({ current: 0, total: 100, message: 'Initializing AI Model (this may download ~2GB first time)...' });
+
+            await aiAnalyzer.initialize((report: InitProgressReport) => {
+                const percent = Math.round(report.progress * 100);
+                setProgress({
+                    current: percent,
+                    total: 100,
+                    message: report.text
+                });
+            });
+
+            // Step 2: Extract Text from Backend
+            setProgress({ current: 0, total: 100, message: 'Extracting text from document...' });
+
             const token = await getToken();
-            const response = await fetch(`${API_URL}/analyze`, {
+            const response = await fetch(`${API_URL}/extract-text`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    filename,
-                }),
+                body: JSON.stringify({ filename }),
             });
 
-            if (!response.ok) {
-                throw new Error('Analysis failed');
+            if (!response.ok) throw new Error('Text extraction failed');
+
+            const data = await response.json();
+            const pages = data.pages; // Expecting [{page: 1, text: "..."}, ...]
+
+            if (!pages || pages.length === 0) {
+                throw new Error('No text found in document');
             }
 
-            if (!response.body) {
-                throw new Error('No response body');
+            // Step 3: Analyze each page locally
+            const totalPages = pages.length;
+            const allHighlights: Highlight[] = [];
+
+            for (let i = 0; i < totalPages; i++) {
+                const pageData = pages[i];
+                setProgress({
+                    current: i + 1,
+                    total: totalPages,
+                    message: `Analyzing page ${i + 1} of ${totalPages}...`
+                });
+
+                const highlights = await aiAnalyzer.analyzeText(pageData.text);
+
+                // Add page number to highlights
+                const pageHighlights = highlights.map(h => ({
+                    ...h,
+                    page: pageData.page
+                }));
+
+                allHighlights.push(...pageHighlights);
             }
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let buffer = '';
+            // Complete
+            setResult({
+                matches: allHighlights.length,
+                download_url: `/download/analyzed_${filename}`, // Note: This file won't exist yet on backend effectively, 
+                // client-side highlighting on PDF not implemented yet in this flow.
+                // For now, we show the results in the panel.
+                highlights: allHighlights
+            });
 
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-
-                // Process all complete lines
-                buffer = lines.pop() || '';
-
-                for (const line of lines) {
-                    if (!line.trim()) continue;
-
-                    try {
-                        const data = JSON.parse(line);
-
-                        if (data.type === 'progress') {
-                            setProgress({
-                                current: data.current,
-                                total: data.total,
-                                message: data.message
-                            });
-                        } else if (data.type === 'complete') {
-                            setResult(data.data);
-                            setProgress(null); // Clear progress when done
-                        } else if (data.type === 'error') {
-                            throw new Error(data.message);
-                        }
-                    } catch (e) {
-                        console.error('Error parsing stream data:', e);
-                    }
-                }
-            }
+            setProgress(null);
 
         } catch (err: any) {
             console.error(err);
-            setError(err.message || 'Failed to analyze PDF. Please ensure the backend is running and API key is set.');
+            setError(err.message || 'Analysis failed.');
             setProgress(null);
         } finally {
             setIsProcessing(false);
