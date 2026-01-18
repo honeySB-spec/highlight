@@ -14,7 +14,9 @@ import json
 from auth import login_required
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+# Allow CORS for all domains for now, or strictly from FRONTEND_URL
+frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+CORS(app, resources={r"/*": {"origins": "*"}}) # Keeping generous CORS for now to avoid issues, but good to know
 
 UPLOAD_FOLDER = 'uploads'
 PROCESSED_FOLDER = 'processed'
@@ -171,6 +173,7 @@ def uploaded_file(filename):
 @login_required
 def create_checkout_session():
     stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:5173')
     try:
         checkout_session = stripe.checkout.Session.create(
             line_items=[
@@ -180,8 +183,8 @@ def create_checkout_session():
                 },
             ],
             mode='subscription',
-            success_url='http://localhost:5173/?success=true',
-            cancel_url='http://localhost:5173/?canceled=true',
+            success_url=f'{frontend_url}/?success=true',
+            cancel_url=f'{frontend_url}/?canceled=true',
             metadata={
                  'user_id': getattr(g, 'user_id', 'unknown')
             }
